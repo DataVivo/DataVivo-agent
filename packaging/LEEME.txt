@@ -1,0 +1,26 @@
+DataVivo Agent para Windows
+================================
+
+Requisitos: Windows 10/11 o Windows Server 2016+, salida a Internet por el puerto 443.
+Para SQL Server: "ODBC Driver 18 for SQL Server" (o el driver ODBC de tu base de datos).
+
+Instalación (5 minutos)
+1. En el panel (paso 2) descarga tu config.yaml y guárdalo en esta carpeta.
+2. Edita config.yaml y elige qué tablas, ficheros DBF u hojas Excel quieres publicar.
+3. En el panel (paso 3) crea un token de agente.
+4. Abre PowerShell COMO ADMINISTRADOR en esta carpeta y ejecuta:
+
+     powershell -ExecutionPolicy Bypass -File .\install-agent.ps1 -Token "dva_..." -Config .\config.yaml
+
+   Si usas SQL Server, añade la cadena de conexión (se guarda protegida, no en config.yaml):
+     -DbUrl "mssql+pyodbc://usuario_lectura:clave@SERVIDOR/BASEDATOS?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes"
+   y en config.yaml pon:  url_file: C:/ProgramData/DataVivo/db.url
+
+5. Comprueba en el panel que el agente aparece "Conectado".
+
+Probar sin instalar:   .\datavivo-agent.exe --config .\config.yaml --check
+Logs:                  C:\ProgramData\DataVivo\agent.log
+Desinstalar:           .\uninstall-agent.ps1   (añade -Purge para borrar config y token)
+
+Seguridad: el agente es de solo lectura, solo expone lo que indiques en config.yaml y
+únicamente abre una conexión saliente cifrada. Recomendamos un usuario de BD con permisos de lectura.

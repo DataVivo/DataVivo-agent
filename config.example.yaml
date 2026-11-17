@@ -1,0 +1,61 @@
+# Copia este fichero como config.yaml. Solo lo que aparece aquí se expone a la nube.
+cloud:
+  url: wss://datavivo.es/agent/ws
+  # El token NO va en este fichero: se lee de esta variable de entorno (o de token_file)
+  token_env: DATAVIVO_AGENT_TOKEN
+  # token_file: C:/ProgramData/DataVivo/agent.token
+  # allow_insecure: true        # solo desarrollo, permite ws://localhost
+  request_timeout: 25
+  max_concurrency: 4
+
+security:
+  allow_writes: false           # el MVP solo admite lectura
+  max_limit: 1000               # máximo de filas por petición
+  decimal_mode: string          # string (exacto) | float
+
+sources:
+  erp:
+    type: sql
+    # Cadena SQLAlchemy en variable de entorno. Ejemplos:
+    #   mssql+pyodbc://usuario:clave@MI_DSN
+    #   mssql+pyodbc://usuario:clave@SERVIDOR/BD?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes
+    #   postgresql+psycopg://usuario:clave@host/bd
+    #   mysql+pymysql://usuario:clave@host/bd
+    # Usa un usuario de BD con permisos SOLO de lectura.
+    url_env: ERP_DB_URL
+    tables:
+      clientes:                 # nombre público del recurso -> GET /api/v1/{tenant}/clientes
+        table: CLIENTES
+        schema: dbo
+        columns: [CODIGO, NOMBRE, CIF, CIUDAD, FECHA_ALTA]
+        order_by: CODIGO
+      ventas_por_cliente:       # consulta personalizada (solo SELECT, validada al arrancar)
+        query: >
+          SELECT c.CODIGO, c.NOMBRE, SUM(f.TOTAL) AS TOTAL
+          FROM CLIENTES c JOIN FACTURAS f ON f.CLIENTE = c.CODIGO
+          GROUP BY c.CODIGO, c.NOMBRE
+        columns: [CODIGO, NOMBRE, TOTAL]
+
+  facturacion:
+    type: dbf
+    path: C:/GESTION/DATOS
+    encoding: cp850             # opcional; por defecto el codepage de la cabecera DBF
+    tables:
+      facturas:
+        file: FACTURAS.DBF
+        columns: "*"
+      articulos:
+        file: ARTICULO.DBF
+        columns: [CODIGO, DESCRIP, PVP, STOCK]
+
+  hojas:
+    type: excel
+    path: C:/Datos
+    tables:
+      stock:
+        file: stock.xlsx
+        sheet: Hoja1
+        columns: [Referencia, Descripción, Unidades, Almacén]
+      tarifas:
+        file: tarifas.csv       # CSV: separador autodetectado (o csv_sep: ";")
+        columns: "*"

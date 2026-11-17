@@ -1,0 +1,37 @@
+# Publica el instalador al crear un tag:  git tag v0.2.0 && git push origin v0.2.0
+# Descarga estable: https://github.com/DataVivo/datavivo-agent/releases/latest/download/datavivo-agent-windows.zip
+name: Release
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Tests
+        run: |
+          python -m pip install -r requirements.txt
+          python -m pytest -q
+      - name: Comprobar que el tag coincide con la versión del agente
+        shell: pwsh
+        run: |
+          $v = ((python agent.py --version) -split " ")[-1].Trim()
+          if ("v$v" -ne "${{ github.ref_name }}") { throw "El tag ${{ github.ref_name }} no coincide con AGENT_VERSION $v" }
+      - name: Empaquetar
+        shell: pwsh
+        run: ./packaging/build.ps1 -Python (Get-Command python).Source
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: DataVivo Agent ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            dist/*.zip
+            dist/*.sha256
