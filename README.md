@@ -1,5 +1,10 @@
 # DataVivo Agent
 
+[![CI](https://github.com/DataVivo/DataVivo-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/DataVivo/DataVivo-agent/actions/workflows/ci.yml)
+[![Release probada](https://github.com/DataVivo/DataVivo-agent/actions/workflows/smoke.yml/badge.svg)](https://github.com/DataVivo/DataVivo-agent/actions/workflows/smoke.yml)
+[![Última versión](https://img.shields.io/github/v/release/DataVivo/DataVivo-agent)](https://github.com/DataVivo/DataVivo-agent/releases/latest)
+[![Licencia MIT](https://img.shields.io/badge/licencia-MIT-blue)](LICENSE)
+
 Agente local de **[DataVivo](https://datavivo.es)** para Windows. Conecta tu programa de gestión (SQL Server, MySQL,
 PostgreSQL, ficheros DBF de FoxPro/Clipper/dBase, Excel y CSV) con Power BI, tu CRM y asistentes de IA, **en modo de
 solo lectura** y **sin abrir puertos**.
