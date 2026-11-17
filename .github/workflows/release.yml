@@ -28,6 +28,9 @@ jobs:
       - name: Empaquetar
         shell: pwsh
         run: ./packaging/build.ps1 -Python (Get-Command python).Source
+      - name: Probar el ejecutable antes de publicarlo
+        shell: pwsh
+        run: ./packaging/smoke-test.ps1 -Exe ./build/agent/bin/datavivo-agent.exe -ExpectedVersion ("${{ github.ref_name }}".TrimStart("v"))
       - uses: softprops/action-gh-release@v2
         with:
           name: DataVivo Agent ${{ github.ref_name }}

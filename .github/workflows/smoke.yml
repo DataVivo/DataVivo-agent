@@ -1,0 +1,41 @@
+# Descarga la ÚLTIMA versión publicada (igual que un cliente) y la ejecuta en un Windows limpio.
+# Se lanza tras cada Release, manualmente, cada lunes y cuando cambia este fichero.
+name: Smoke test de la release publicada
+on:
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/smoke.yml
+      - packaging/smoke-test.ps1
+
+jobs:
+  smoke:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Descargar y verificar SHA256
+        shell: pwsh
+        run: |
+          $base = "https://github.com/${{ github.repository }}/releases/latest/download"
+          Invoke-WebRequest "$base/datavivo-agent-windows.zip" -OutFile agent.zip
+          Invoke-WebRequest "$base/datavivo-agent-windows.zip.sha256" -OutFile agent.sha256
+          $expected = ((Get-Content agent.sha256 -Raw).Trim() -split "\s+")[0]
+          $actual = (Get-FileHash agent.zip -Algorithm SHA256).Hash
+          if ($expected -ne $actual) { throw "SHA256 no coincide: $actual vs $expected" }
+          Expand-Archive agent.zip -DestinationPath pkg
+          foreach ($f in "datavivo-agent.exe","install-agent.ps1","uninstall-agent.ps1","LEEME.txt","config.example.yaml") {
+            if (-not (Test-Path "pkg/$f")) { throw "Falta $f en el zip" }
+          }
+      - name: Ejecutar el agente publicado
+        shell: pwsh
+        run: ./packaging/smoke-test.ps1 -Exe ./pkg/datavivo-agent.exe
