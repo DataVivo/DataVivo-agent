@@ -97,11 +97,9 @@ class SQLConnector(DataConnector):
             col = fc.c[f.field]
             stmt = stmt.where(_condition(col, f))
 
-        if tcfg.order_by or offset:
-            order_name = tcfg.order_by or self.allowed_columns(table)[0].name
-            if order_name not in fc.c:
-                raise ConnectorError(f"[{table}] order_by {order_name!r} no existe")
-            stmt = stmt.order_by(fc.c[order_name])
+        # Orden SIEMPRE determinista (también en la primera página): sin él, la paginación (offset)
+        # puede devolver filas repetidas o saltarse filas, p. ej. al refrescar Power BI página a página.
+        stmt = stmt.order_by(*self._order_columns(table, fc))
 
         stmt = stmt.limit(limit)
         if offset:
@@ -111,6 +109,19 @@ class SQLConnector(DataConnector):
         with self.engine.connect() as conn:
             result = conn.execute(stmt)
             return [dict(row._mapping) for row in result]
+
+
+    def _order_columns(self, table: str, fc: FromClause) -> list:
+        """order_by configurado → clave primaria → todas las columnas publicadas (orden total y estable)."""
+        tcfg = self._table_cfg(table)
+        if tcfg.order_by:
+            if tcfg.order_by not in fc.c:
+                raise ConnectorError(f"[{table}] order_by {tcfg.order_by!r} no existe")
+            return [fc.c[tcfg.order_by]]
+        pk = list(getattr(fc, "primary_key", None) or [])
+        if pk:
+            return pk
+        return [fc.c[c.name] for c in self.allowed_columns(table)]
 
 
 def _type_name(col: Column) -> str:

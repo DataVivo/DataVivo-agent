@@ -55,6 +55,30 @@ def test_sql_like_in_paging_and_limit(resources):
     assert len(q(resources, "clientes", limit=10_000)) == 3  # recortado a max_limit
 
 
+def test_sql_pagination_is_stable_without_order_by(config):
+    """Sin order_by configurado, recorrer por páginas debe devolver exactamente todas las filas, sin duplicados."""
+    raw = config.model_dump(by_alias=True)
+    raw["sources"]["erp"]["tables"]["clientes"].pop("order_by")
+    raw["sources"]["erp"]["tables"]["madrid"]["columns"] = ["CODIGO", "NOMBRE"]
+    from config import AgentConfig
+
+    res = build_resources(AgentConfig.model_validate(raw))
+    connector, table = res["clientes"]
+    full = connector.query_data(table, limit=50)
+    pages, offset = [], 0
+    while True:
+        page = connector.query_data(table, limit=2, offset=offset)
+        if not page:
+            break
+        pages += page
+        offset += len(page)
+    assert [r["CODIGO"] for r in pages] == [r["CODIGO"] for r in full] == [1, 2, 3]
+    # Consulta personalizada (sin clave primaria): orden por todas las columnas, también estable
+    q_conn, q_table = res["madrid"]
+    assert [r["CODIGO"] for r in q_conn.query_data(q_table, limit=1)] == [1]
+    assert [r["CODIGO"] for r in q_conn.query_data(q_table, limit=1, offset=1)] == [3]
+
+
 def test_sql_custom_query(resources):
     rows = q(resources, "madrid", filters=[Filter(field="CODIGO", op="gte", value=2)])
     assert rows == [{"CODIGO": 3, "NOMBRE": "Talleres Martín"}]

@@ -27,7 +27,7 @@ from config import AgentConfig, load_config
 from connectors import ConnectorError, DataConnector, InvalidRequestError, UnknownResourceError, build_resources
 from protocol import AgentHello, AgentResult, ErrorCode, QueryRequest, ResourceSchema
 
-AGENT_VERSION = "0.2.0"
+AGENT_VERSION = "0.2.1"
 DATA_DIR = Path(os.environ.get("PROGRAMDATA", "C:/ProgramData")) / "DataVivo"
 MAX_INBOUND_MESSAGE = 1 * 1024 * 1024  # la nube solo envía peticiones pequeñas
 MAX_BACKOFF = 60.0
