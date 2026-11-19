@@ -5,12 +5,25 @@
 [![Última versión](https://img.shields.io/github/v/release/DataVivo/DataVivo-agent)](https://github.com/DataVivo/DataVivo-agent/releases/latest)
 [![Licencia MIT](https://img.shields.io/badge/licencia-MIT-blue)](LICENSE)
 
-Agente local de **[DataVivo](https://datavivo.es)** para Windows. Conecta tu programa de gestión (SQL Server, MySQL,
-PostgreSQL, ficheros DBF de FoxPro/Clipper/dBase, Excel y CSV) con Power BI, tu CRM y asistentes de IA, **en modo de
-solo lectura** y **sin abrir puertos**.
+Agente local de **[DataVivo](https://datavivo.es/?utm_source=github&utm_medium=readme)** para Windows. Conecta tu programa
+de gestión (SQL Server, MySQL, PostgreSQL, ficheros DBF de FoxPro/Clipper/dBase, Excel y CSV) con Power BI, tu CRM y
+asistentes de IA, **en modo de solo lectura** y **sin abrir puertos**.
+
+**De un `.DBF` de los 90 a Power BI o a Claude/ChatGPT en 15 minutos, sin migrar nada.**
+
+👉 **[Pruébalo gratis 14 días](https://datavivo.es/?utm_source=github&utm_medium=readme)** · sin tarjeta ·
+⭐ si te resulta útil, **dale una estrella** al repositorio: nos ayuda a que más empresas lo encuentren.
 
 > Este repositorio es público para que el responsable de IT de tu empresa pueda revisar exactamente qué se instala en
-> el servidor. *Open-source local agent for DataVivo: read-only, outbound-only connector for legacy business data.*
+> el servidor. *Open-source local agent for DataVivo: read-only, outbound-only connector for legacy business data
+> (SQL Server, FoxPro/dBase DBF, Excel) → REST API + MCP server for AI assistants.*
+
+## Qué puedes hacer con él
+| Caso | Cómo |
+|---|---|
+| **Power BI / Excel** | El panel genera la consulta Power Query lista para pegar: descarga todas las filas con sus tipos |
+| **Asistentes de IA (MCP)** | Claude, ChatGPT o tus agentes consultan tus tablas en lenguaje natural |
+| **CRM, web, n8n/Make** | API REST con filtros (`?CIUDAD=Madrid&SALDO__gte=100`), JSON o CSV |
 
 ## Descargar
 **[⬇ Última versión para Windows](https://github.com/DataVivo/datavivo-agent/releases/latest/download/datavivo-agent-windows.zip)**
@@ -22,7 +35,7 @@ Get-FileHash .\datavivo-agent-windows.zip -Algorithm SHA256
 ```
 
 ## Instalación
-1. Crea una cuenta en [datavivo.es](https://datavivo.es/app) (14 días de prueba gratis).
+1. Crea una cuenta en [datavivo.es](https://datavivo.es/?utm_source=github&utm_medium=readme) (14 días de prueba gratis).
 2. En el panel, descarga tu `config.yaml` y crea un token de agente.
 3. Descomprime el zip en el servidor donde están tus datos, edita `config.yaml` y ejecuta en PowerShell **como administrador**:
    ```powershell
